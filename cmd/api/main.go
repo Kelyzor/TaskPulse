@@ -42,6 +42,10 @@ func main() {
 			users.GET("/", h.GetUsers)
 			users.GET("/me", middleware.AuthMiddleware(), h.GetMe)
 		}
+		tasks := api.Group("/tasks")
+		{
+			tasks.GET("", middleware.AuthMiddleware(), h.GetTasks)
+		}
 		api.DELETE("/deleteUser/:id", h.DeleteUser)
 	}
 
