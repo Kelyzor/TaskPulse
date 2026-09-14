@@ -161,3 +161,39 @@ func (h Handler) UpdateTask(c *gin.Context) {
 
 	c.IndentedJSON(http.StatusOK, task)
 }
+
+func (h Handler) DeleteTask(c *gin.Context) {
+	email, exists := c.Get("email")
+
+	if !exists {
+		c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	var user models.User
+
+	if result := h.DB.Where("email = ?", email).First(&user); result.Error != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	taskID := c.Param("id")
+	var task models.Task
+
+	if result := h.DB.Where("id = ?", taskID).First(&task); result.Error != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "task not found"})
+		return
+	}
+
+	if task.UserID != user.ID {
+		c.IndentedJSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+		return
+	}
+
+	if result := h.DB.Delete(&task); result.Error != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{"message": "task deleted"})
+}

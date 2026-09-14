@@ -48,6 +48,7 @@ func main() {
 			tasks.POST("", middleware.AuthMiddleware(), h.CreateTask)
 			tasks.GET("/:id", middleware.AuthMiddleware(), h.GetTask)
 			tasks.PUT("/:id", middleware.AuthMiddleware(), h.UpdateTask)
+			tasks.DELETE("/:id", middleware.AuthMiddleware(), h.DeleteTask)
 		}
 		api.DELETE("/deleteUser/:id", h.DeleteUser)
 	}
