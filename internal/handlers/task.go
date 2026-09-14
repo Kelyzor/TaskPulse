@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"taskpulse/internal/models"
@@ -40,9 +41,26 @@ func (h Handler) GetTasks(c *gin.Context) {
 		return
 	}
 
-	var tasks []models.Task
+	status := c.Query("status")
 
-	if result := h.DB.Where("user_id = ?", user.ID).Find(&tasks); result.Error != nil {
+	query := h.DB.Where("user_id = ?", user.ID)
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+
+	page := c.DefaultQuery("page", "1")
+	limit := c.DefaultQuery("limit", "10")
+
+	pageInt, _ := strconv.Atoi(page)
+	limitInt, _ := strconv.Atoi(limit)
+
+	offset := (pageInt - 1) * limitInt
+
+	var tasks []models.Task
+	if result := query.
+		Offset(offset).
+		Limit(limitInt).
+		Find(&tasks); result.Error != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 		return
 	}
