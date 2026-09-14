@@ -1,0 +1,2 @@
+ALTER TABLE tasks ADD COLUMN priority VARCHAR(20) DEFAULT 'medium';
+ALTER TABLE tasks ADD COLUMN due_date TIMESTAMP;

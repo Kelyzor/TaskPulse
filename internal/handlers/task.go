@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"taskpulse/internal/models"
 
@@ -9,15 +10,19 @@ import (
 )
 
 type CreateTaskInput struct {
-	Title       string `json:"title" binding:"required,min=1,max=255"`
-	Description string `json:"description" binding:"max=1000"`
-	Status      string `json:"status" binding:"omitempty,oneof=pending in_progress done"`
+	Title       string     `json:"title" binding:"required,min=1,max=255"`
+	Description string     `json:"description" binding:"max=1000"`
+	Status      string     `json:"status" binding:"omitempty,oneof=pending in_progress done"`
+	Priority    string     `json:"priority" binding:"omitempty,oneof=low medium high"`
+	DueDate     *time.Time `json:"due_date"`
 }
 
 type UpdateTaskInput struct {
-	Title       string `json:"title" binding:"omitempty,min=1,max=255"`
-	Description string `json:"description" binding:"omitempty,max=1000"`
-	Status      string `json:"status" binding:"omitempty,oneof=pending in_progress done"`
+	Title       string     `json:"title" binding:"required,min=1,max=255"`
+	Description string     `json:"description" binding:"max=1000"`
+	Status      string     `json:"status" binding:"omitempty,oneof=pending in_progress done"`
+	Priority    string     `json:"priority" binding:"omitempty,oneof=low medium high"`
+	DueDate     *time.Time `json:"due_date"`
 }
 
 func (h Handler) GetTasks(c *gin.Context) {
@@ -154,6 +159,8 @@ func (h Handler) UpdateTask(c *gin.Context) {
 		Title:       updateInput.Title,
 		Description: updateInput.Description,
 		Status:      updateInput.Status,
+		Priority:    updateInput.Priority,
+		DueDate:     updateInput.DueDate,
 	}).Scan(&task); result.Error != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 		return
