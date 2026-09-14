@@ -14,6 +14,12 @@ type CreateTaskInput struct {
 	Status      string `json:"status" binding:"omitempty,oneof=pending in_progress done"`
 }
 
+type UpdateTaskInput struct {
+	Title       string `json:"title" binding:"omitempty,min=1,max=255"`
+	Description string `json:"description" binding:"omitempty,max=1000"`
+	Status      string `json:"status" binding:"omitempty,oneof=pending in_progress done"`
+}
+
 func (h Handler) GetTasks(c *gin.Context) {
 	email, exists := c.Get("email")
 
@@ -102,6 +108,54 @@ func (h Handler) GetTask(c *gin.Context) {
 
 	if user.ID != task.UserID {
 		c.IndentedJSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, task)
+}
+
+func (h Handler) UpdateTask(c *gin.Context) {
+	email, exists := c.Get("email")
+
+	if !exists {
+		c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	var user models.User
+
+	if result := h.DB.Where("email = ?", email).First(&user); result.Error != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	taskID := c.Param("id")
+
+	var task models.Task
+
+	if result := h.DB.Where("id = ?", taskID).First(&task); result.Error != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "task not found"})
+		return
+	}
+
+	if task.UserID != user.ID {
+		c.IndentedJSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+		return
+	}
+
+	var updateInput UpdateTaskInput
+
+	if err := c.ShouldBindJSON(&updateInput); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if result := h.DB.Model(&task).Updates(models.Task{
+		Title:       updateInput.Title,
+		Description: updateInput.Description,
+		Status:      updateInput.Status,
+	}).Scan(&task); result.Error != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 		return
 	}
 
