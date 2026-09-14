@@ -26,6 +26,13 @@ services:
         condition: service_healthy
     environment:
       - DATABASE_URL=${DATABASE_URL}
+  adminer:
+    image: adminer:latest
+    container_name: taskpulse_adminer
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
 
 volumes:
   postgres_data:

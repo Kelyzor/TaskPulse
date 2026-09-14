@@ -75,3 +75,35 @@ func (h Handler) CreateTask(c *gin.Context) {
 
 	c.IndentedJSON(http.StatusCreated, task)
 }
+
+func (h Handler) GetTask(c *gin.Context) {
+	email, exists := c.Get("email")
+
+	if !exists {
+		c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	var user models.User
+
+	if result := h.DB.Where("email = ?", email).First(&user); result.Error != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	taskID := c.Param("id")
+
+	var task models.Task
+
+	if result := h.DB.Where("id = ?", taskID).First(&task); result.Error != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "task not found"})
+		return
+	}
+
+	if user.ID != task.UserID {
+		c.IndentedJSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, task)
+}
