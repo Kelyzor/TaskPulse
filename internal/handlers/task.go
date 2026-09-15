@@ -27,17 +27,9 @@ type UpdateTaskInput struct {
 }
 
 func (h Handler) GetTasks(c *gin.Context) {
-	email, exists := c.Get("email")
+	user, err := h.GetFromUserContext(c)
 
-	if !exists {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-		return
-	}
-
-	var user models.User
-
-	if result := h.DB.Where("email = ?", email).First(&user); result.Error != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
+	if err != nil {
 		return
 	}
 
@@ -69,17 +61,9 @@ func (h Handler) GetTasks(c *gin.Context) {
 }
 
 func (h Handler) CreateTask(c *gin.Context) {
-	email, exists := c.Get("email")
+	user, err := h.GetFromUserContext(c)
 
-	if !exists {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-		return
-	}
-
-	var user models.User
-
-	if result := h.DB.Where("email = ?", email).First(&user); result.Error != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
+	if err != nil {
 		return
 	}
 
@@ -106,17 +90,9 @@ func (h Handler) CreateTask(c *gin.Context) {
 }
 
 func (h Handler) GetTask(c *gin.Context) {
-	email, exists := c.Get("email")
+	user, err := h.GetFromUserContext(c)
 
-	if !exists {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-		return
-	}
-
-	var user models.User
-
-	if result := h.DB.Where("email = ?", email).First(&user); result.Error != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
+	if err != nil {
 		return
 	}
 
@@ -138,17 +114,9 @@ func (h Handler) GetTask(c *gin.Context) {
 }
 
 func (h Handler) UpdateTask(c *gin.Context) {
-	email, exists := c.Get("email")
+	user, err := h.GetFromUserContext(c)
 
-	if !exists {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-		return
-	}
-
-	var user models.User
-
-	if result := h.DB.Where("email = ?", email).First(&user); result.Error != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
+	if err != nil {
 		return
 	}
 
@@ -188,17 +156,9 @@ func (h Handler) UpdateTask(c *gin.Context) {
 }
 
 func (h Handler) DeleteTask(c *gin.Context) {
-	email, exists := c.Get("email")
+	user, err := h.GetFromUserContext(c)
 
-	if !exists {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-		return
-	}
-
-	var user models.User
-
-	if result := h.DB.Where("email = ?", email).First(&user); result.Error != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
+	if err != nil {
 		return
 	}
 
