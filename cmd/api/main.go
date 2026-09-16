@@ -1,13 +1,20 @@
 package main
 
 import (
+	"context"
 	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"taskpulse/internal/handlers"
 	"taskpulse/internal/logger"
 	"taskpulse/internal/middleware"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -59,5 +66,29 @@ func main() {
 		api.DELETE("/deleteUser/:id", h.DeleteUser)
 	}
 
-	router.Run(":8080")
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: router,
+	}
+
+	go func() {
+		sigint := make(chan os.Signal, 1)
+		signal.Notify(sigint, syscall.SIGINT, syscall.SIGTERM)
+		<-sigint
+
+		log.Info("shutdown signal received, gracefully stopping server...")
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := server.Shutdown(ctx); err != nil {
+			log.Error("server shutdown error", zap.Error(err))
+		}
+	}()
+
+	log.Info("server starting on :8080")
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Fatal("server error", zap.Error(err))
+	}
+
+	log.Info("server stopped")
 }
