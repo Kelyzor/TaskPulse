@@ -53,11 +53,11 @@ func (h Handler) GetTasks(c *gin.Context) {
 		Offset(offset).
 		Limit(limitInt).
 		Find(&tasks); result.Error != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		ErrorResponse(c, http.StatusInternalServerError, result.Error.Error())
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, tasks)
+	SuccessResponse(c, http.StatusOK, tasks)
 }
 
 func (h Handler) CreateTask(c *gin.Context) {
@@ -70,7 +70,7 @@ func (h Handler) CreateTask(c *gin.Context) {
 	var taskInput CreateTaskInput
 
 	if err := c.ShouldBindJSON(&taskInput); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -82,11 +82,11 @@ func (h Handler) CreateTask(c *gin.Context) {
 	}
 
 	if result := h.DB.Create(&task); result.Error != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		ErrorResponse(c, http.StatusInternalServerError, result.Error.Error())
 		return
 	}
 
-	c.IndentedJSON(http.StatusCreated, task)
+	SuccessResponse(c, http.StatusCreated, task)
 }
 
 func (h Handler) GetTask(c *gin.Context) {
@@ -101,16 +101,16 @@ func (h Handler) GetTask(c *gin.Context) {
 	var task models.Task
 
 	if result := h.DB.Where("id = ?", taskID).First(&task); result.Error != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "task not found"})
+		ErrorResponse(c, http.StatusNotFound, "task not found")
 		return
 	}
 
 	if user.ID != task.UserID {
-		c.IndentedJSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+		ErrorResponse(c, http.StatusForbidden, "Access denied")
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, task)
+	SuccessResponse(c, http.StatusOK, task)
 }
 
 func (h Handler) UpdateTask(c *gin.Context) {
@@ -125,19 +125,19 @@ func (h Handler) UpdateTask(c *gin.Context) {
 	var task models.Task
 
 	if result := h.DB.Where("id = ?", taskID).First(&task); result.Error != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "task not found"})
+		ErrorResponse(c, http.StatusNotFound, "task not found")
 		return
 	}
 
 	if task.UserID != user.ID {
-		c.IndentedJSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+		ErrorResponse(c, http.StatusForbidden, "Access denied")
 		return
 	}
 
 	var updateInput UpdateTaskInput
 
 	if err := c.ShouldBindJSON(&updateInput); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -148,11 +148,11 @@ func (h Handler) UpdateTask(c *gin.Context) {
 		Priority:    updateInput.Priority,
 		DueDate:     updateInput.DueDate,
 	}).Scan(&task); result.Error != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		ErrorResponse(c, http.StatusInternalServerError, result.Error.Error())
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, task)
+	SuccessResponse(c, http.StatusOK, task)
 }
 
 func (h Handler) DeleteTask(c *gin.Context) {
@@ -166,19 +166,19 @@ func (h Handler) DeleteTask(c *gin.Context) {
 	var task models.Task
 
 	if result := h.DB.Where("id = ?", taskID).First(&task); result.Error != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "task not found"})
+		ErrorResponse(c, http.StatusNotFound, "task not found")
 		return
 	}
 
 	if task.UserID != user.ID {
-		c.IndentedJSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+		ErrorResponse(c, http.StatusForbidden, "Access denied")
 		return
 	}
 
 	if result := h.DB.Delete(&task); result.Error != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		ErrorResponse(c, http.StatusInternalServerError, result.Error.Error())
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"message": "task deleted"})
+	SuccessResponse(c, http.StatusOK, gin.H{"message": "task deleted"})
 }

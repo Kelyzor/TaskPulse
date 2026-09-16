@@ -20,19 +20,19 @@ func (h Handler) RegisterUser(c *gin.Context) {
 	var input models.RegisterInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	var existingUser models.User
 	if result := h.DB.Where("email = ?", input.Email).First(&existingUser); result.Error == nil {
-		c.IndentedJSON(http.StatusConflict, gin.H{"error": "Email already exists"})
+		ErrorResponse(c, http.StatusConflict, "Email already exists")
 		return
 	}
 
 	hashedPassword, err := HashPassword(input.Password)
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -43,29 +43,29 @@ func (h Handler) RegisterUser(c *gin.Context) {
 	}
 
 	if result := h.DB.Create(&user); result.Error != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		ErrorResponse(c, http.StatusInternalServerError, result.Error.Error())
 		return
 	}
 
-	c.IndentedJSON(http.StatusCreated, user)
+	SuccessResponse(c, http.StatusCreated, user)
 }
 
 func (h Handler) LoginUser(c *gin.Context) {
 	var input models.RegisterInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	var user models.User
 	if result := h.DB.Where("email = ?", input.Email).First(&user); result.Error != nil {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "invalid email or password"})
+		ErrorResponse(c, http.StatusUnauthorized, "invalid email or password")
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(input.Password)); err != nil {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "invalid email or password"})
+		ErrorResponse(c, http.StatusUnauthorized, "invalid email or password")
 		return
 	}
 
@@ -79,37 +79,37 @@ func (h Handler) LoginUser(c *gin.Context) {
 
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"token": token})
+	SuccessResponse(c, http.StatusOK, gin.H{"token": token})
 }
 
 func (h Handler) GetMe(c *gin.Context) {
 	email, exists := c.Get("email")
 
 	if !exists {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		ErrorResponse(c, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 
 	var user models.User
 	if result := h.DB.Where("email = ?", email).First(&user); result.Error != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		ErrorResponse(c, http.StatusNotFound, "user not found")
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, user)
+	SuccessResponse(c, http.StatusOK, user)
 }
 
 func (h Handler) GetUsers(c *gin.Context) {
 	var users []models.User
 	if result := h.DB.Find(&users); result.Error != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		ErrorResponse(c, http.StatusInternalServerError, result.Error.Error())
 		return
 	}
-	c.IndentedJSON(http.StatusOK, users)
+	SuccessResponse(c, http.StatusOK, users)
 }
 
 func (h Handler) DeleteUser(c *gin.Context) {
@@ -117,16 +117,16 @@ func (h Handler) DeleteUser(c *gin.Context) {
 
 	result := h.DB.Delete(&models.User{}, id)
 	if result.Error != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		ErrorResponse(c, http.StatusInternalServerError, result.Error.Error())
 		return
 	}
 
 	if result.RowsAffected == 0 {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		ErrorResponse(c, http.StatusNotFound, "user not found")
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"message": "user deleted"})
+	SuccessResponse(c, http.StatusOK, gin.H{"message": "user deleted"})
 }
 
 func HashPassword(password string) (string, error) {

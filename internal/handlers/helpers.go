@@ -30,3 +30,11 @@ func (h Handler) GetFromUserContext(c *gin.Context) (*models.User, error) {
 
 	return &user, nil
 }
+
+func ErrorResponse(c *gin.Context, statusCode int, message string) {
+	c.IndentedJSON(statusCode, gin.H{"error": message})
+}
+
+func SuccessResponse(c *gin.Context, statusCode int, data interface{}) {
+	c.IndentedJSON(statusCode, data)
+}
