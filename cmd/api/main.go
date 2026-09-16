@@ -32,6 +32,7 @@ func main() {
 	h := handlers.Handler{DB: db, Logger: log}
 
 	router := gin.Default()
+	router.Use(middleware.CORSMiddleware())
 
 	router.GET("/health", h.HealthCheck)
 
