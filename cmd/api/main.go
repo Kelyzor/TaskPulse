@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"taskpulse/internal/handlers"
+	"taskpulse/internal/logger"
 	"taskpulse/internal/middleware"
 
 	"github.com/gin-gonic/gin"
@@ -22,11 +23,13 @@ func InitDB() *gorm.DB {
 }
 
 func main() {
-	// Загружаем переменные из .env
 	_ = godotenv.Load()
 
+	log := logger.InitLogger()
+	defer log.Sync()
+
 	db := InitDB()
-	h := handlers.Handler{DB: db}
+	h := handlers.Handler{DB: db, Logger: log}
 
 	router := gin.Default()
 
