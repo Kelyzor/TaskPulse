@@ -33,6 +33,8 @@ func main() {
 
 	router := gin.Default()
 
+	router.GET("/health", h.HealthCheck)
+
 	api := router.Group("/api/v1")
 	{
 		auth := api.Group("/auth")
