@@ -18,6 +18,18 @@ type Handler struct {
 	Logger *zap.Logger
 }
 
+// RegisterUser godoc
+// @Summary      Register new user
+// @Description  Create a new user account with email and password
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        request  body      models.RegisterInput  true  "User registration data"
+// @Success      201      {object}  models.User
+// @Failure      400      {object}  map[string]string
+// @Failure      409      {object}  map[string]string "Conflict (email already exists)"
+// @Failure      500      {object}  map[string]string "Internal server error"
+// @Router       /api/v1/auth/register [post]
 func (h Handler) RegisterUser(c *gin.Context) {
 	var input models.RegisterInput
 
@@ -57,6 +69,17 @@ func (h Handler) RegisterUser(c *gin.Context) {
 	SuccessResponse(c, http.StatusCreated, user)
 }
 
+// LoginUser godoc
+// @Summary      Login user
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        request  body      models.RegisterInput  true  "User login data"
+// @Success      200      {object}  map[string]string
+// @Failure      400      {object}  map[string]string "Bad request (invalid JSON)"
+// @Failure      401      {object}  map[string]string "Unauthorized (wrong email/password)"
+// @Failure      500      {object}  map[string]string "Internal server error"
+// @Router       /api/v1/auth/login [post]
 func (h Handler) LoginUser(c *gin.Context) {
 	var input models.RegisterInput
 
@@ -98,6 +121,17 @@ func (h Handler) LoginUser(c *gin.Context) {
 	SuccessResponse(c, http.StatusOK, gin.H{"token": token})
 }
 
+// GetMe godoc
+// @Summary      Get current user
+// @Description  Get profile of authenticated user
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200      {object}  models.User
+// @Failure      401      {object}  map[string]string "Unauthorized (missing or invalid token)"
+// @Failure      404      {object}  map[string]string "User not found"
+// @Router       /api/v1/users/me [get]
 func (h Handler) GetMe(c *gin.Context) {
 	email, exists := c.Get("email")
 
@@ -118,6 +152,13 @@ func (h Handler) GetMe(c *gin.Context) {
 	SuccessResponse(c, http.StatusOK, user)
 }
 
+// GetUsers godoc
+// @Summary      Get all users
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Success      200      {array}   models.User
+// @Router       /api/v1/users [get]
 func (h Handler) GetUsers(c *gin.Context) {
 	var users []models.User
 	if result := h.DB.Find(&users); result.Error != nil {
@@ -129,6 +170,16 @@ func (h Handler) GetUsers(c *gin.Context) {
 	SuccessResponse(c, http.StatusOK, users)
 }
 
+// DeleteUser godoc
+// @Summary      Delete user
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        id   path      string  true  "User ID"
+// @Success      200      {object}  map[string]string
+// @Failure      404      {object}  map[string]string
+// @Failure      500      {object}  map[string]string "Internal server error"
+// @Router       /api/v1/users/{id} [delete]
 func (h Handler) DeleteUser(c *gin.Context) {
 	id := c.Param("id")
 

@@ -27,6 +27,18 @@ type UpdateTaskInput struct {
 	DueDate     *time.Time `json:"due_date"`
 }
 
+// GetTasks godoc
+// @Summary      Get user tasks
+// @Tags         tasks
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        page   query     int    false  "Page number"
+// @Param        limit  query     int    false  "Items per page"
+// @Param        status query     string false  "Filter by status"
+// @Success      200    {array}   models.Task
+// @Failure      401    {object}  map[string]string
+// @Router       /api/v1/tasks [get]
 func (h Handler) GetTasks(c *gin.Context) {
 	user, err := h.GetFromUserContext(c)
 
@@ -64,6 +76,17 @@ func (h Handler) GetTasks(c *gin.Context) {
 	SuccessResponse(c, http.StatusOK, tasks)
 }
 
+// CreateTask godoc
+// @Summary      Create task
+// @Tags         tasks
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request  body      handlers.CreateTaskInput  true  "Task data"
+// @Success      201      {object}  models.Task
+// @Failure      400      {object}  map[string]string
+// @Failure      401      {object}  map[string]string
+// @Router       /api/v1/tasks [post]
 func (h Handler) CreateTask(c *gin.Context) {
 	user, err := h.GetFromUserContext(c)
 
@@ -99,6 +122,17 @@ func (h Handler) CreateTask(c *gin.Context) {
 	SuccessResponse(c, http.StatusCreated, task)
 }
 
+// GetTask godoc
+// @Summary      Get task by ID
+// @Tags         tasks
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      int  true  "Task ID"
+// @Success      200  {object}  models.Task
+// @Failure      401  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /api/v1/tasks/{id} [get]
 func (h Handler) GetTask(c *gin.Context) {
 	user, err := h.GetFromUserContext(c)
 
@@ -127,6 +161,19 @@ func (h Handler) GetTask(c *gin.Context) {
 	SuccessResponse(c, http.StatusOK, task)
 }
 
+// UpdateTask godoc
+// @Summary      Update task
+// @Tags         tasks
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id       path      int                      true  "Task ID"
+// @Param        request  body      handlers.UpdateTaskInput  true  "Updated data"
+// @Success      200      {object}  models.Task
+// @Failure      400      {object}  map[string]string
+// @Failure      401      {object}  map[string]string
+// @Failure      404      {object}  map[string]string
+// @Router       /api/v1/tasks/{id} [put]
 func (h Handler) UpdateTask(c *gin.Context) {
 	user, err := h.GetFromUserContext(c)
 
@@ -175,6 +222,17 @@ func (h Handler) UpdateTask(c *gin.Context) {
 	SuccessResponse(c, http.StatusOK, task)
 }
 
+// DeleteTask godoc
+// @Summary      Delete task
+// @Tags         tasks
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      int  true  "Task ID"
+// @Success      200  {object}  map[string]string
+// @Failure      401  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /api/v1/tasks/{id} [delete]
 func (h Handler) DeleteTask(c *gin.Context) {
 	user, err := h.GetFromUserContext(c)
 

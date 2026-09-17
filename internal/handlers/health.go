@@ -8,6 +8,13 @@ import (
 	"go.uber.org/zap"
 )
 
+// HealthCheck godoc
+// @Summary      Health check
+// @Tags         monitoring
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  map[string]string
+// @Router       /health [get]
 func (h Handler) HealthCheck(c *gin.Context) {
 	db, err := h.DB.DB()
 

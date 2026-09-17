@@ -7,10 +7,14 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	_ "taskpulse/docs"
 	"taskpulse/internal/handlers"
 	"taskpulse/internal/logger"
 	"taskpulse/internal/middleware"
 	"time"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -29,6 +33,11 @@ func InitDB() *gorm.DB {
 	return db
 }
 
+// @title        TaskPulse API
+// @version      1.0
+// @description  Task management REST API
+// @host         localhost:8080
+// @basePath     /
 func main() {
 	_ = godotenv.Load()
 
@@ -42,6 +51,7 @@ func main() {
 	router.Use(middleware.CORSMiddleware())
 
 	router.GET("/health", h.HealthCheck)
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	api := router.Group("/api/v1")
 	{
