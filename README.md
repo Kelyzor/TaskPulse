@@ -149,7 +149,7 @@ internal/migrations/
 ## Future Improvements
 
 - [ ] Comprehensive test coverage (>80%)
-- [ ] Swagger/OpenAPI docs
+- [+] Swagger/OpenAPI docs
 - [ ] WebSocket notifications
 - [ ] Email verification
 - [ ] Refresh tokens
