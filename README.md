@@ -12,6 +12,7 @@ Task management REST API built with Go, Gin, PostgreSQL, and JWT authentication.
 - ✅ Health check endpoint
 - ✅ Structured logging with Zap
 - ✅ Unit tests
+- ✅ Swagger/OpenAPI docs
 
 ## Tech Stack
 
@@ -149,7 +150,6 @@ internal/migrations/
 ## Future Improvements
 
 - [ ] Comprehensive test coverage (>80%)
-- [+] Swagger/OpenAPI docs
 - [ ] WebSocket notifications
 - [ ] Email verification
 - [ ] Refresh tokens
